@@ -11,59 +11,99 @@
         .results { font-weight: bold; margin-top: 20px; }
         .pass { color: green; }
         .fail { color: red; }
+        #quizContainer { display: none; }
+        #timer { font-weight: bold; margin-bottom: 20px; }
     </style>
 </head>
 <body>
     <h1>Area ATC Exam Practice Quiz</h1>
-    <p>40 questions | Passing mark: 75%</p>
-    <form id="quizForm">
-        <!-- Questions will be populated here -->
-    </form>
-    <button onclick="gradeQuiz()">Submit Quiz</button>
-    <div id="results" class="results"></div>
+    <p>40 questions | 15-minute time limit | Passing mark: 75%</p>
+    <label for="nameInput">Name: </label>
+    <input type="text" id="nameInput" placeholder="Enter your name">
+    <button id="startBtn">Start Quiz</button>
+    <div id="timer"></div>
+    <div id="quizContainer">
+        <form id="quizForm"></form>
+        <button onclick="gradeQuiz()">Submit Quiz</button>
+        <div id="results" class="results"></div>
+    </div>
 
     <script>
+        let timeLeft = 15 * 60; // 15 minutes in seconds
+        let timerInterval;
+
+        function startTimer() {
+            document.getElementById('timer').textContent = formatTime(timeLeft);
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timer').textContent = formatTime(timeLeft);
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    gradeQuiz();
+                }
+            }, 1000);
+        }
+
+        function formatTime(seconds) {
+            const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+            const s = (seconds % 60).toString().padStart(2, '0');
+            return `${m}:${s}`;
+        }
+
+        document.getElementById('startBtn').addEventListener('click', () => {
+            const name = document.getElementById('nameInput').value.trim();
+            if (!name) {
+                alert('Please enter your name to begin.');
+                return;
+            }
+            document.getElementById('startBtn').style.display = 'none';
+            document.getElementById('nameInput').disabled = true;
+            document.getElementById('quizContainer').style.display = 'block';
+            buildQuiz();
+            startTimer();
+        });
+
         const quizData = [
-            { id: 'q1', text: 'Which controller is responsible for updating the Flight Data Record (FDR) before a flight enters the sector?', options: ['Executive Controller (EC)', 'Planner Controller (PLC)', 'Supervisor (SUP-ACC)', 'Flight Data Assistant (FDA)'], answer: 'B' },
-            { id: 'q2', text: 'Who maintains separation between flights within a sector?', options: ['PLC', 'SUP-ACC', 'EC', 'Pilot'], answer: 'C' },
-            { id: 'q3', text: 'What is the primary purpose of the sector log?', options: ['To display radar maps', 'To record items of operational importance', 'To file ATSR reports', 'To store flight plans'], answer: 'B' },
-            { id: 'q4', text: 'Which of the following should NOT be noted in the sector log?', options: ['Temporary coordination agreements', 'Technical equipment status', 'Special weather phenomena', 'Pilot personal details'], answer: 'D' },
-            { id: 'q5', text: 'Who is required to process manual inbound estimates and revisions for IFR flights?', options: ['EC', 'PLC', 'SUP-ACC', 'Pilot'], answer: 'B' },
-            { id: 'q6', text: 'When must obsolete text in the OP TEXT field be deleted?', options: ['At the end of the day', 'Before handover to the next sector', 'During cruise phase', 'Only on supervisor request'], answer: 'B' },
-            { id: 'q7', text: 'Why might a backup block be used?', options: ['To list emergency procedures', 'To record clearances not entered in FDR', 'To file incident reports', 'To display aerodrome charts'], answer: 'B' },
-            { id: 'q8', text: 'What does AoR stand for?', options: ['Area of Responsibility', 'Assigned Operating Region', 'Airspace Operations Report', 'Area Operations Radar'], answer: 'A' },
-            { id: 'q9', text: 'Which sectors are classified as eastern sectors in Gate ACC?', options: ['B-D-I-E-A-C-UA-UC', 'L-V-UV-N-S', 'A-B-C', 'D-E-F'], answer: 'A' },
-            { id: 'q10', text: 'Which sectors are classified as western sectors in Gate ACC?', options: ['B-D-I', 'L-V-UV-N-S', 'A-C-E', 'UA-UC'], answer: 'B' },
-            { id: 'q11', text: 'Airspace from FL195 to FL660 in EKDK FIR is Class __?', options: ['C', 'E', 'G', 'D'], answer: 'A' },
-            { id: 'q12', text: 'Airspace from 3500 ft MSL to FL195 outside TMAs is Class __?', options: ['C', 'E', 'G', 'D'], answer: 'B' },
-            { id: 'q13', text: 'Airspace from ground to 3500 ft MSL excluding CTRs and North Sea is Class __?', options: ['C', 'E', 'G', 'D'], answer: 'C' },
-            { id: 'q14', text: 'What is the transponder code for hijacking (unlawful interference)?', options: ['7500', '7600', '7700', '7400'], answer: 'A' },
-            { id: 'q15', text: 'What does OLDI stand for?', options: ['On-Line Data Interchange', 'Onboard Log Data Input', 'Operational Level Directive Instruction', 'Oldest Data Index'], answer: 'A' },
-            { id: 'q16', text: 'What is CTOT?', options: ['Calculated Take Off Time', 'Controlled Time On Track', 'Current Time of Traffic', 'Clearance Time Option'], answer: 'A' },
-            { id: 'q17', text: 'The system used for Controller-Pilot Data Link Communications is abbreviated as __?', options: ['CPDLC', 'ACAS', 'ADS-B', 'FDR'], answer: 'A' },
-            { id: 'q18', text: 'Which section of the Local Operations Manual covers internal regulations?', options: ['LOM 1', 'LOM 2', 'LOM 3', 'LOM 4'], answer: 'B' },
-            { id: 'q19', text: 'Which section of the LOM covers ACC sectors?', options: ['LOM 2', 'LOM 3', 'LOM 4', 'LOM 5'], answer: 'B' },
-            { id: 'q20', text: 'Which section covers coordination with Danish ATS units?', options: ['LOM 3', 'LOM 4', 'LOM 5', 'LOM 6'], answer: 'B' },
-            { id: 'q21', text: 'For IFR formation flights, which controller coordinates formation status?', options: ['EC', 'PLC', 'SUP-ACC', 'FDA'], answer: 'B' },
-            { id: 'q22', text: 'What must PLC do when activating a TRA/TSA in the sector?', options: ['Notify pilots only', 'Activate on ODS and update sector log', 'File an ATSR report', 'Cancel flight plans'], answer: 'B' },
-            { id: 'q23', text: 'What information is recorded for a TRA/TSA activation? (Select one)', options: ['Pilot POB', 'Controlling ACU', 'Meteorological data', 'Radar map used'], answer: 'B' },
-            { id: 'q24', text: 'When transiting an active TRA, what must EC ensure before entry?', options: ['TRA deactivation', 'Level band limitation applied', 'Frequency change', 'Squawk code update'], answer: 'B' },
-            { id: 'q25', text: 'How is an inbound clearance via STAR indicated in OP TEXT?', options: ['Marked with “C”', 'Bold text', 'Italics', 'Underlined'], answer: 'A' },
-            { id: 'q26', text: 'What must be done when coordinating a flight route not in the current plan?', options: ['PLC updates FDR and acknowledges in OP TEXT', 'EC changes radar labels', 'SUP-ACC approves only', 'Pilot is informed'], answer: 'A' },
-            { id: 'q27', text: 'What is the meaning of UIR?', options: ['Upper Information Region', 'Uncontrolled Information Route', 'Unified IFR Region', 'Upper IFR Route'], answer: 'A' },
-            { id: 'q28', text: 'What does FIR stand for?', options: ['Flight Information Region', 'Flight Internal Radar', 'Fixed Information Route', 'Flight Identification Record'], answer: 'A' },
-            { id: 'q29', text: 'What does CTA stand for?', options: ['Control Area', 'Coordination Altitude', 'Central Traffic Area', 'Control Transfer Authority'], answer: 'A' },
-            { id: 'q30', text: 'Who must messages concerning abnormal situations be forwarded to?', options: ['EC', 'PLC', 'SUP-ACC', 'Pilot'], answer: 'C' },
-            { id: 'q31', text: 'Which type of incident is listed in Appendix 1 as requiring reporting?', options: ['Separation minima infringement', 'Routine frequency change', 'Weather update', 'Newsletter distribution'], answer: 'A' },
-            { id: 'q32', text: 'Which wildlife event must be reported according to Appendix 1?', options: ['Birdstrike', 'Routine flight test', 'Scheduled maintenance', 'Radar calibration'], answer: 'A' },
-            { id: 'q33', text: 'Who closes the flight plan when an aircraft transitions from IFR to VFR without closure?', options: ['EC', 'PLC', 'Pilot', 'SUP-ACC'], answer: 'C' },
-            { id: 'q34', text: 'After IFR to VFR transition, who should a civilian pilot contact for continued FIS?', options: ['DENMIL', 'COIF', 'LOCATEL', 'ATIS'], answer: 'B' },
-            { id: 'q35', text: 'Who handles military flights continuing VFR?', options: ['COIF', 'DENMIL', 'SUP-ACC', 'FDA'], answer: 'B' },
-            { id: 'q36', text: 'Which message abbreviation indicates a transfer initiation?', options: ['TIM', 'TIP', 'REQ', 'RAP'], answer: 'A' },
-            { id: 'q37', text: 'Which system input registers a hold commencement in FDR?', options: ['HOLD', 'XHOLD', 'RELEASE', 'COORD'], answer: 'A' },
-            { id: 'q38', text: 'Which message field must be cleared before handover?', options: ['OP TEXT', 'ADF', 'VOR', 'ILS'], answer: 'A' },
-            { id: 'q39', text: 'What is the document version number valid from 02.04.2024 for LOM part 1 Gate ACC?', options: ['0.01', '1.01', '2.01', '3.09'], answer: 'A' },
-            { id: 'q40', text: 'How many questions are on this quiz?', options: ['35', '40', '45', '50'], answer: 'B' }
+            { id: 'q1', text: 'What is the minimum vertical separation between aircraft in RVSM airspace?', options: ['300 ft', '500 ft', '1000 ft', '2000 ft'], answer: 'A' },
+            { id: 'q2', text: 'Which transponder code indicates a general emergency?', options: ['7500', '7600', '7700', '7800'], answer: 'C' },
+            { id: 'q3', text: 'What is the primary purpose of Airborne Collision Avoidance System (ACAS)?', options: ['Provide weather updates', 'Conflict detection and resolution advisories', 'Voice communication backup', 'Flight plan management'], answer: 'B' },
+            { id: 'q4', text: 'In the event of a Radio Telephony failure, what code should be set in VMC?', options: ['7500', '7600', '7700', '7000'], answer: 'B' },
+            { id: 'q5', text: 'What does the acronym SSR stand for?', options: ['Secondary Surveillance Radar', 'Standard Sector Release', 'Signal Safety Regulation', 'System Status Report'], answer: 'A' },
+            { id: 'q6', text: 'Which document is the primary reference for local ATC procedures?', options: ['ICAO Annex 2', 'Local Operations Manual', 'AIP SUP', 'Skyguide AIP'], answer: 'B' },
+            { id: 'q7', text: 'What is the purpose of a Holding Pattern?', options: ['Sequencing and separation of traffic', 'Emergency descent', 'Runway inspection', 'Pilot training'], answer: 'A' },
+            { id: 'q8', text: 'What phraseology indicates minimum fuel status without emergency?', options: ['Mayday', 'PAN PAN', 'Minimum fuel', 'Fuel emergency'], answer: 'C' },
+            { id: 'q9', text: 'Which class of airspace requires ATC clearance and two-way radio comms?', options: ['Class A', 'Class C', 'Class G', 'Class D'], answer: 'B' },
+            { id: 'q10', text: 'What is the standard instrument departure procedure called?', options: ['SID', 'STAR', 'IAP', 'DME'], answer: 'A' },
+            { id: 'q11', text: 'What is the function of Flight Data Recorder (FDR) in ATC systems?', options: ['Record pilot actions', 'Store flight plan and coordination data', 'Measure fuel consumption', 'Broadcast weather info'], answer: 'B' },
+            { id: 'q12', text: 'Which minimum separation is applied between IFR and VFR in Class E?', options: ['500 ft vertical', '1000 ft vertical', '3 NM lateral', 'No separation'], answer: 'D' },
+            { id: 'q13', text: 'What action should a controller take on receiving a TCAS RA report?', options: ['Issue conflicting instruction', 'Advise other traffic to vacate altitude', 'Provide traffic info, no conflicting changes', 'Silence frequency'], answer: 'C' },
+            { id: 'q14', text: 'Which phrase indicates unlawful interference (hijack)?', options: ['7500', '7600', '7700', '7110'], answer: 'A' },
+            { id: 'q15', text: 'What does CPDLC stand for?', options: ['Controller Pilot Data Link Communications', 'Centralized Pilot Data Link Command', 'Collision Prevention Data Link', 'Controlled Pilot Dispatch Link'], answer: 'A' },
+            { id: 'q16', text: 'Which separation minima apply for non-RVSM above FL245?', options: ['1000 ft', '2000 ft', '3000 ft', '500 ft'], answer: 'B' },
+            { id: 'q17', text: 'What is the significance of squawk code 7600 in IMC?', options: ['Emergency', 'Hijack', 'Radio failure', 'Lost communication'], answer: 'C' },
+            { id: 'q18', text: 'What is the meaning of the term AoR in ATC?', options: ['Area of Responsibility', 'Airspace Operations Radar', 'Assigned Operational Route', 'Altitude of Readiness'], answer: 'A' },
+            { id: 'q19', text: 'Which separation is maintained between IFR aircraft in non-radar areas?', options: ['5 NM lateral', '10 NM lateral', '1000 ft vertical', '2000 ft vertical'], answer: 'A' },
+            { id: 'q20', text: 'What is a STAR procedure?', options: ['Standard Terminal Arrival Route', 'Strategic Traffic Arrival Route', 'Standard Time Alert Response', 'Sector Transfer Arrival Regulation'], answer: 'A' },
+            { id: 'q21', text: 'Which element is NOT part of an emergency handling mnemonic?', options: ['Acknowledge', 'Silence', 'Notify', 'Time'], answer: 'C' },
+            { id: 'q22', text: 'What does MSAW stand for?', options: ['Minimum Safe Altitude Warning', 'Maximum Speed Alert Warning', 'Minimum Separation Altitude Watch', 'Meteorological Safety Alert Warning'], answer: 'A' },
+            { id: 'q23', text: 'Which service provides flight information and alerting only?', options: ['FIS', 'APP', 'ACC', 'TWR'], answer: 'A' },
+            { id: 'q24', text: 'What is the standard sector handover phrase to pilots?', options: ['Contact next controlling unit on...', 'Taxi to runway...', 'Climb and maintain...', 'Descend and maintain...'], answer: 'A' },
+            { id: 'q25', text: 'What information must be included in a diversion message?', options: ['New ADES and route', 'Pilot surname', 'Aircraft weight', 'Flight number only'], answer: 'A' },
+            { id: 'q26', text: 'Which failure results in transponder off to save battery?', options: ['Electrical failure', 'Engine failure', 'Birdstrike', 'Radio failure'], answer: 'A' },
+            { id: 'q27', text: 'Which mnemonics guide handling in TCAS RA events?', options: ['AVIATE', 'NAVROS', 'ASSIST', 'SETPAS'], answer: 'C' },
+            { id: 'q28', text: 'What is the normal action after emergency descent completion?', options: ['Request intentions', 'Resume flight plan silently', 'Climb to FL100', 'Squawk 7600'], answer: 'A' },
+            { id: 'q29', text: 'Which agency investigates ATC incidents in Denmark?', options: ['HCLJ', 'COIF', 'DENMIL', 'MOSM'], answer: 'A' },
+            { id: 'q30', text: 'Which code is used for a hijacking incident on the transponder?', options: ['7500', '7600', '7700', '7000'], answer: 'A' },
+            { id: 'q31', text: 'What does ADS-B stand for?', options: ['Automatic Dependent Surveillance–Broadcast', 'Air Data System–Broadcast', 'Altitude Data Surveillance–Background', 'Area Dependent System–Broadcast'], answer: 'A' },
+            { id: 'q32', text: 'Which document contains EU-level ATC safety reporting rules?', options: ['EU 376/2014', 'ICAO Annex 11', 'AIP SUP', 'Local Ops Manual'], answer: 'A' },
+            { id: 'q33', text: 'What phrase indicates urgency without danger?', options: ['Mayday', 'PAN PAN', 'Securite', 'Priority'], answer: 'B' },
+            { id: 'q34', text: 'Which code should a VMC aircraft set for radio failure?', options: ['7600', '7700', '7500', '7000'], answer: 'A' },
+            { id: 'q35', text: 'What is the minimum safe obstacle clearance in non-mountainous areas?', options: ['1000 ft', '300 m', '600 m', '2000 ft'], answer: 'B' },
+            { id: 'q36', text: 'Which document lists procedures for birdstrike handling?', options: ['LOM Emergency Annex', 'ABES ASSIST', 'ICAO Doc 7030', 'AIP SUP'], answer: 'A' },
+            { id: 'q37', text: 'What is the typical time a radio-failure aircraft holds before resuming route in IMC?', options: ['5 minutes', '7 minutes', '10 minutes', '3 minutes'], answer: 'B' },
+            { id: 'q38', text: 'Which acronym refers to calculated takeoff time?', options: ['CTOT', 'EOBT', 'ETD', 'TOBT'], answer: 'A' },
+            { id: 'q39', text: 'What is the minimum lateral separation in radar-controlled airspace?', options: ['3 NM', '5 NM', '10 NM', '1 NM'], answer: 'A' },
+            { id: 'q40', text: 'What percentage is the passing grade for this quiz?', options: ['70%', '75%', '80%', '85%'], answer: 'B' }
         ];
 
         function buildQuiz() {
@@ -82,6 +122,7 @@
         }
 
         function gradeQuiz() {
+            clearInterval(timerInterval);
             let score = 0;
             quizData.forEach(q => {
                 const sel = document.querySelector(`input[name="${q.id}"]:checked`);
@@ -90,10 +131,9 @@
             const percent = (score / quizData.length) * 100;
             const resultsDiv = document.getElementById('results');
             const passFail = percent >= 75 ? 'pass' : 'fail';
-            resultsDiv.innerHTML = `You scored ${score} out of ${quizData.length} (${percent.toFixed(1)}%). <span class="${passFail}">${percent.toFixed(1)}% - ${passFail === 'pass' ? 'Pass' : 'Fail'}</span>`;
+            const name = document.getElementById('nameInput').value;
+            resultsDiv.innerHTML = `${name}, you scored ${score} out of ${quizData.length} (${percent.toFixed(1)}%). <span class="${passFail}">${percent.toFixed(1)}% - ${passFail === 'pass' ? 'Pass' : 'Fail'}</span>`;
         }
-
-        buildQuiz();
     </script>
 </body>
 </html>
