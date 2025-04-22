@@ -1,148 +1,99 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Area ATC Exam Quiz</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 2rem; background: #f4f4f4; color: #333; }
-    h1 { color: #004d99; }
-    .question, .quiz-section { background: #fff; border-radius: 8px; padding: 1rem; margin: 1rem 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-    .question h3 { margin: 0.5rem 0; }
-    .answers { margin-left: 1rem; }
-    .answers label { display: block; margin: 0.25rem 0; }
-    button { margin-top: 1rem; padding: 0.75rem 1.5rem; background-color: #004d99; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
-    button:hover { background-color: #003366; }
-    #timer { font-weight: bold; color: #d9534f; }
-    #quiz-content, #result { display: none; }
-    .correct { color: green; }
-    .incorrect { color: red; }
-  </style>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Area ATC Exam Practice Quiz</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .question { margin-bottom: 15px; }
+        .results { font-weight: bold; margin-top: 20px; }
+        .pass { color: green; }
+        .fail { color: red; }
+    </style>
 </head>
 <body>
-  <h1>Area ATC Exam Quiz</h1>
+    <h1>Area ATC Exam Practice Quiz</h1>
+    <p>40 questions | Passing mark: 75%</p>
+    <form id="quizForm">
+        <!-- Questions will be populated here -->
+    </form>
+    <button onclick="gradeQuiz()">Submit Quiz</button>
+    <div id="results" class="results"></div>
 
-  <div id="start-section" class="quiz-section">
-    <label for="name">Enter your name to begin:</label>
-    <input type="text" id="name" placeholder="Your Name" required />
-    <br />
-    <button onclick="startQuiz()">Start Quiz</button>
-  </div>
+    <script>
+        const quizData = [
+            { id: 'q1', text: 'Which controller is responsible for updating the Flight Data Record (FDR) before a flight enters the sector?', options: ['Executive Controller (EC)', 'Planner Controller (PLC)', 'Supervisor (SUP-ACC)', 'Flight Data Assistant (FDA)'], answer: 'B' },
+            { id: 'q2', text: 'Who maintains separation between flights within a sector?', options: ['PLC', 'SUP-ACC', 'EC', 'Pilot'], answer: 'C' },
+            { id: 'q3', text: 'What is the primary purpose of the sector log?', options: ['To display radar maps', 'To record items of operational importance', 'To file ATSR reports', 'To store flight plans'], answer: 'B' },
+            { id: 'q4', text: 'Which of the following should NOT be noted in the sector log?', options: ['Temporary coordination agreements', 'Technical equipment status', 'Special weather phenomena', 'Pilot personal details'], answer: 'D' },
+            { id: 'q5', text: 'Who is required to process manual inbound estimates and revisions for IFR flights?', options: ['EC', 'PLC', 'SUP-ACC', 'Pilot'], answer: 'B' },
+            { id: 'q6', text: 'When must obsolete text in the OP TEXT field be deleted?', options: ['At the end of the day', 'Before handover to the next sector', 'During cruise phase', 'Only on supervisor request'], answer: 'B' },
+            { id: 'q7', text: 'Why might a backup block be used?', options: ['To list emergency procedures', 'To record clearances not entered in FDR', 'To file incident reports', 'To display aerodrome charts'], answer: 'B' },
+            { id: 'q8', text: 'What does AoR stand for?', options: ['Area of Responsibility', 'Assigned Operating Region', 'Airspace Operations Report', 'Area Operations Radar'], answer: 'A' },
+            { id: 'q9', text: 'Which sectors are classified as eastern sectors in Gate ACC?', options: ['B-D-I-E-A-C-UA-UC', 'L-V-UV-N-S', 'A-B-C', 'D-E-F'], answer: 'A' },
+            { id: 'q10', text: 'Which sectors are classified as western sectors in Gate ACC?', options: ['B-D-I', 'L-V-UV-N-S', 'A-C-E', 'UA-UC'], answer: 'B' },
+            { id: 'q11', text: 'Airspace from FL195 to FL660 in EKDK FIR is Class __?', options: ['C', 'E', 'G', 'D'], answer: 'A' },
+            { id: 'q12', text: 'Airspace from 3500 ft MSL to FL195 outside TMAs is Class __?', options: ['C', 'E', 'G', 'D'], answer: 'B' },
+            { id: 'q13', text: 'Airspace from ground to 3500 ft MSL excluding CTRs and North Sea is Class __?', options: ['C', 'E', 'G', 'D'], answer: 'C' },
+            { id: 'q14', text: 'What is the transponder code for hijacking (unlawful interference)?', options: ['7500', '7600', '7700', '7400'], answer: 'A' },
+            { id: 'q15', text: 'What does OLDI stand for?', options: ['On-Line Data Interchange', 'Onboard Log Data Input', 'Operational Level Directive Instruction', 'Oldest Data Index'], answer: 'A' },
+            { id: 'q16', text: 'What is CTOT?', options: ['Calculated Take Off Time', 'Controlled Time On Track', 'Current Time of Traffic', 'Clearance Time Option'], answer: 'A' },
+            { id: 'q17', text: 'The system used for Controller-Pilot Data Link Communications is abbreviated as __?', options: ['CPDLC', 'ACAS', 'ADS-B', 'FDR'], answer: 'A' },
+            { id: 'q18', text: 'Which section of the Local Operations Manual covers internal regulations?', options: ['LOM 1', 'LOM 2', 'LOM 3', 'LOM 4'], answer: 'B' },
+            { id: 'q19', text: 'Which section of the LOM covers ACC sectors?', options: ['LOM 2', 'LOM 3', 'LOM 4', 'LOM 5'], answer: 'B' },
+            { id: 'q20', text: 'Which section covers coordination with Danish ATS units?', options: ['LOM 3', 'LOM 4', 'LOM 5', 'LOM 6'], answer: 'B' },
+            { id: 'q21', text: 'For IFR formation flights, which controller coordinates formation status?', options: ['EC', 'PLC', 'SUP-ACC', 'FDA'], answer: 'B' },
+            { id: 'q22', text: 'What must PLC do when activating a TRA/TSA in the sector?', options: ['Notify pilots only', 'Activate on ODS and update sector log', 'File an ATSR report', 'Cancel flight plans'], answer: 'B' },
+            { id: 'q23', text: 'What information is recorded for a TRA/TSA activation? (Select one)', options: ['Pilot POB', 'Controlling ACU', 'Meteorological data', 'Radar map used'], answer: 'B' },
+            { id: 'q24', text: 'When transiting an active TRA, what must EC ensure before entry?', options: ['TRA deactivation', 'Level band limitation applied', 'Frequency change', 'Squawk code update'], answer: 'B' },
+            { id: 'q25', text: 'How is an inbound clearance via STAR indicated in OP TEXT?', options: ['Marked with “C”', 'Bold text', 'Italics', 'Underlined'], answer: 'A' },
+            { id: 'q26', text: 'What must be done when coordinating a flight route not in the current plan?', options: ['PLC updates FDR and acknowledges in OP TEXT', 'EC changes radar labels', 'SUP-ACC approves only', 'Pilot is informed'], answer: 'A' },
+            { id: 'q27', text: 'What is the meaning of UIR?', options: ['Upper Information Region', 'Uncontrolled Information Route', 'Unified IFR Region', 'Upper IFR Route'], answer: 'A' },
+            { id: 'q28', text: 'What does FIR stand for?', options: ['Flight Information Region', 'Flight Internal Radar', 'Fixed Information Route', 'Flight Identification Record'], answer: 'A' },
+            { id: 'q29', text: 'What does CTA stand for?', options: ['Control Area', 'Coordination Altitude', 'Central Traffic Area', 'Control Transfer Authority'], answer: 'A' },
+            { id: 'q30', text: 'Who must messages concerning abnormal situations be forwarded to?', options: ['EC', 'PLC', 'SUP-ACC', 'Pilot'], answer: 'C' },
+            { id: 'q31', text: 'Which type of incident is listed in Appendix 1 as requiring reporting?', options: ['Separation minima infringement', 'Routine frequency change', 'Weather update', 'Newsletter distribution'], answer: 'A' },
+            { id: 'q32', text: 'Which wildlife event must be reported according to Appendix 1?', options: ['Birdstrike', 'Routine flight test', 'Scheduled maintenance', 'Radar calibration'], answer: 'A' },
+            { id: 'q33', text: 'Who closes the flight plan when an aircraft transitions from IFR to VFR without closure?', options: ['EC', 'PLC', 'Pilot', 'SUP-ACC'], answer: 'C' },
+            { id: 'q34', text: 'After IFR to VFR transition, who should a civilian pilot contact for continued FIS?', options: ['DENMIL', 'COIF', 'LOCATEL', 'ATIS'], answer: 'B' },
+            { id: 'q35', text: 'Who handles military flights continuing VFR?', options: ['COIF', 'DENMIL', 'SUP-ACC', 'FDA'], answer: 'B' },
+            { id: 'q36', text: 'Which message abbreviation indicates a transfer initiation?', options: ['TIM', 'TIP', 'REQ', 'RAP'], answer: 'A' },
+            { id: 'q37', text: 'Which system input registers a hold commencement in FDR?', options: ['HOLD', 'XHOLD', 'RELEASE', 'COORD'], answer: 'A' },
+            { id: 'q38', text: 'Which message field must be cleared before handover?', options: ['OP TEXT', 'ADF', 'VOR', 'ILS'], answer: 'A' },
+            { id: 'q39', text: 'What is the document version number valid from 02.04.2024 for LOM part 1 Gate ACC?', options: ['0.01', '1.01', '2.01', '3.09'], answer: 'A' },
+            { id: 'q40', text: 'How many questions are on this quiz?', options: ['35', '40', '45', '50'], answer: 'B' }
+        ];
 
-  <div id="quiz-content">
-    <p>Time Remaining: <span id="timer">15:00</span></p>
-    <div id="questions-container"></div>
-    <p><em>This quiz includes 40 questions based on ABES ASSIST, LOM GATE ACC, and LOM PRISHTINA ACC documents.</em></p>
-    <button onclick="submitQuiz()">Submit Quiz</button>
-  </div>
-
-  <div id="result" class="quiz-section"></div>
-
-  <script>
-    const questions = [/const questions = [
-  { question: "What squawk code is used for a general emergency?", options: ["7500", "7600", "7700", "7000"], correct: 2 },
-  { question: "Which code is used for radio communication failure?", options: ["7500", "7600", "7700", "7000"], correct: 1 },
-  { question: "Which code indicates unlawful interference (hijack)?", options: ["7500", "7600", "7700", "7000"], correct: 0 },
-  { question: "What does ACAS stand for?", options: ["Airborne Collision Avoidance System", "Aircraft Coordination and Air Support", "Altitude Clearance Advisory System", "Air Control Advisory Standard"], correct: 0 },
-  { question: "Who must be informed immediately in case of an air traffic incident?", options: ["AFIS", "SUP-ACC", "TWR", "AIS"], correct: 1 },
-  { question: "What does ATSR stand for?", options: ["Air Traffic Safety Report", "Aerodrome Traffic Safety Regulation", "Airspace Tracking Surveillance Report", "Aeronautical Traffic Support Routine"], correct: 0 },
-  { question: "Who is responsible for updating the FDR according to clearances?", options: ["EC", "PLC", "SUP-ACC", "AFIS"], correct: 1 },
-  { question: "Which message type is associated with aircraft acceptance?", options: ["ABI", "ACT", "ACP", "CDN"], correct: 2 },
-  { question: "What information must be logged in the sector log?", options: ["Weather, equipment status, special agreements", "Runway surface condition", "Aircraft call signs only", "Departure messages"], correct: 0 },
-  { question: "When must a HOLD input be executed?", options: ["After landing", "When requested by pilot", "At commencement of holding", "At TOD"], correct: 2 },
-  { question: "What must be done when an aircraft diverts?", options: ["Update SSR code", "Update FDR and OP TEXT with new ADES", "Send NOTAM", "Notify AFIS only"], correct: 1 },
-  { question: "In which chapter of LOM GATE ACC are incident reporting procedures found?", options: ["Chapter 3", "Chapter 5", "Chapter 2", "Chapter 7"], correct: 2 },
-  { question: "Which frequency band is used for RTF?", options: ["HF", "LF", "UHF", "VHF"], correct: 3 },
-  { question: "How long is the quiz time limit?", options: ["10 minutes", "15 minutes", "20 minutes", "30 minutes"], correct: 1 },
-  { question: "What is the vertical limit of Class C airspace in EKDK FIR?", options: ["GND – FL 245", "FL 195 – FL 660", "FL 350 – FL 660", "GND – FL 195"], correct: 1 },
-  { question: "Who assumes control after transfer of communication?", options: ["EC", "SUP-ACC", "AFIS", "Receiving sector EC"], correct: 3 },
-  { question: "When is OP TEXT used in coordination?", options: ["During takeoff", "After FPL filing", "For manual estimates or revisions", "For STAR clearance only"], correct: 2 },
-  { question: "What is the primary holding for EKCH via TESPI?", options: ["LUGAS", "ROLSI", "ROSBI", "TUDLO"], correct: 2 },
-  { question: "How must skydiving areas be marked on radar?", options: ["With a dot", "With a triangle", "With a cross via QDM", "With a dashed box"], correct: 2 },
-  { question: "What should be updated during TRA activity?", options: ["SSR codes only", "Sector log and ODS", "Flight plan field 18", "QNH value"], correct: 1 },
-  { question: "What does OLDI stand for?", options: ["Online Data Interchange", "Operational Data Link Interface", "Output of Linked Data Input", "Ordinary Line Direction Interface"], correct: 0 },
-  { question: "Which unit issues STAR clearances in GATE ACC?", options: ["AFIS", "SUP-ACC", "EC", "PLC"], correct: 3 },
-  { question: "What action is required after issuing a release via phone?", options: ["Update FPL", "Enter it in OP TEXT", "Notify AIS", "File an ATSR"], correct: 1 },
-  { question: "What does the abbreviation FIR stand for?", options: ["Flight Interference Region", "Flight Information Region", "First-In Route", "Filed Information Record"], correct: 1 },
-  { question: "When should RTF silence be imposed during emergencies?", options: ["Always", "Only when necessary to avoid cockpit distraction", "Never", "During climb only"], correct: 1 },
-  { question: "What is the purpose of the ACC sector log?", options: ["Record flight levels", "Store meteorological charts", "Document operational items of importance", "Transmit frequencies"], correct: 2 },
-  { question: "Which code is for minimum fuel?", options: ["7500", "PAN PAN", "7700", "MAYDAY"], correct: 1 },
-  { question: "Where is the procedure for using the backup block documented?", options: ["LOM 1", "LOM 2", "LOM 5", "AIP"], correct: 1 },
-  { question: "What should a controller do upon receiving a DIV-message?", options: ["Ignore it", "Forward to SUP-ACC", "Update FDR and OP TEXT", "Clear for landing"], correct: 2 },
-  { question: "Who issues updates to OP TEXT when coordinating a STAR?", options: ["AFIS", "EC", "PLC", "SUP-ACC"], correct: 2 },
-  { question: "Which phrase indicates a pilot is continuing with less fuel?", options: ["EMERG", "PAN PAN", "MAYDAY", "UNABLE"], correct: 1 },
-  { question: "What does the acronym SSR stand for?", options: ["Standard Separation Rule", "Secondary Surveillance Radar", "Surface Safety Record", "Separation Service Radar"], correct: 1 },
-  { question: "How many minutes do you have to complete the quiz?", options: ["10", "15", "20", "25"], correct: 1 },
-  { question: "Which level band applies to Class E outside TMAs in EKDK FIR?", options: ["GND–FL 245", "FL 195–FL 660", "3500 ft MSL–FL 195", "FL 660–FL 999"], correct: 2 },
-  { question: "What does FDR stand for?", options: ["Flight Data Record", "Flight Direction Route", "Flight Duty Regulation", "Flight Departure Rule"], correct: 0 },
-  { question: "What should happen before a handover?", options: ["Frequency change", "Check SSR code", "Ensure coordination is complete", "Re-file FPL"], correct: 2 },
-  { question: "When is the HOLD input executed?", options: ["Start of STAR", "During climb", "No later than holding commencement", "At FL195"], correct: 2 },
-  { question: "What is required for IFR transition to VFR?", options: ["Request runway visual range", "Send STAR", "Forward ETA to COIF or DENMIL", "Update SSR"], correct: 2 },
-  { question: "Where is local ATS coordination documented?", options: ["LOM Chapter 5", "LOM Chapter 3", "LOM Chapter 4", "AIP GEN"], correct: 2 }
-];
-/];
-    
-    // ⬆️ The questions array with 40 full Qs is too long to paste inline again
-    // ⚡ Request "full questions array" separately if needed or use link provided earlier
-
-    function loadQuestions() {
-      const container = document.getElementById('questions-container');
-      questions.forEach((q, index) => {
-        const div = document.createElement('div');
-        div.className = 'question';
-        div.innerHTML = `<h3>${index + 1}. ${q.question}</h3>`;
-        q.options.forEach((opt, i) => {
-          div.innerHTML += `<label><input type="radio" name="q${index}" value="${i}"> ${opt}</label>`;
-        });
-        container.appendChild(div);
-      });
-    }
-
-    let timerInterval;
-    function startQuiz() {
-      const name = document.getElementById('name').value.trim();
-      if (!name) {
-        alert('Please enter your name.');
-        return;
-      }
-      document.getElementById('start-section').style.display = 'none';
-      document.getElementById('quiz-content').style.display = 'block';
-      loadQuestions();
-      startTimer(15 * 60);
-    }
-
-    function startTimer(duration) {
-      let timer = duration, minutes, seconds;
-      timerInterval = setInterval(() => {
-        minutes = parseInt(timer / 60, 10);
-        seconds = parseInt(timer % 60, 10);
-        document.getElementById('timer').textContent = `${minutes < 10 ? "0" + minutes : minutes}:${seconds < 10 ? "0" + seconds : seconds}`;
-        if (--timer < 0) {
-          clearInterval(timerInterval);
-          alert('Time is up! Quiz is being submitted.');
-          submitQuiz();
+        function buildQuiz() {
+            const form = document.getElementById('quizForm');
+            quizData.forEach((q, index) => {
+                const div = document.createElement('div');
+                div.className = 'question';
+                let html = `<p><strong>Question ${index + 1}:</strong> ${q.text}</p>`;
+                q.options.forEach((opt, i) => {
+                    const label = String.fromCharCode(65 + i);
+                    html += `<label><input type="radio" name="${q.id}" value="${label}"> ${label}. ${opt}</label><br>`;
+                });
+                div.innerHTML = html;
+                form.appendChild(div);
+            });
         }
-      }, 1000);
-    }
 
-    function submitQuiz() {
-      clearInterval(timerInterval);
-      let score = 0;
-      questions.forEach((q, i) => {
-        const selected = document.querySelector(`input[name='q${i}']:checked`);
-        if (selected && parseInt(selected.value) === q.correct) {
-          score++;
+        function gradeQuiz() {
+            let score = 0;
+            quizData.forEach(q => {
+                const sel = document.querySelector(`input[name="${q.id}"]:checked`);
+                if (sel && sel.value === q.answer) score++;
+            });
+            const percent = (score / quizData.length) * 100;
+            const resultsDiv = document.getElementById('results');
+            const passFail = percent >= 75 ? 'pass' : 'fail';
+            resultsDiv.innerHTML = `You scored ${score} out of ${quizData.length} (${percent.toFixed(1)}%). <span class="${passFail}">${percent.toFixed(1)}% - ${passFail === 'pass' ? 'Pass' : 'Fail'}</span>`;
         }
-      });
-      const percent = (score / questions.length) * 100;
-      const passed = percent >= 75;
-      const resultDiv = document.getElementById('result');
-      resultDiv.innerHTML = `<h2>Results for ${document.getElementById('name').value}</h2>
-        <p>Score: ${score}/${questions.length} (${percent.toFixed(2)}%)</p>
-        <p class="${passed ? 'correct' : 'incorrect'}">${passed ? 'Passed' : 'Failed'}</p>`;
-      document.getElementById('quiz-content').style.display = 'none';
-      resultDiv.style.display = 'block';
-    }
-  </script>
+
+        buildQuiz();
+    </script>
 </body>
 </html>
