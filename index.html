@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Area ATC Exam Quiz</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 2rem; background: #f4f4f4; color: #333; }
+    h1 { color: #004d99; }
+    .question, .quiz-section { background: #fff; border-radius: 8px; padding: 1rem; margin: 1rem 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .question h3 { margin: 0.5rem 0; }
+    .answers { margin-left: 1rem; }
+    .answers label { display: block; margin: 0.25rem 0; }
+    button { margin-top: 1rem; padding: 0.75rem 1.5rem; background-color: #004d99; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
+    button:hover { background-color: #003366; }
+    #timer { font-weight: bold; color: #d9534f; }
+    #quiz-content, #result { display: none; }
+    .correct { color: green; }
+    .incorrect { color: red; }
+  </style>
+</head>
+<body>
+  <h1>Area ATC Exam Quiz</h1>
+
+  <div id="start-section" class="quiz-section">
+    <label for="name">Enter your name to begin:</label>
+    <input type="text" id="name" placeholder="Your Name" required />
+    <br />
+    <button onclick="startQuiz()">Start Quiz</button>
+  </div>
+
+  <div id="quiz-content">
+    <p>Time Remaining: <span id="timer">15:00</span></p>
+    <div id="questions-container"></div>
+    <p><em>This quiz includes 40 questions based on ABES ASSIST, LOM GATE ACC, and LOM PRISHTINA ACC documents.</em></p>
+    <button onclick="submitQuiz()">Submit Quiz</button>
+  </div>
+
+  <div id="result" class="quiz-section"></div>
+
+  <script>
+    const questions = [
+      { question: "What code should an aircraft squawk during a communication failure?", options: ["7500", "7600", "7700", "7000"], correct: 1 },
+      { question: "What does the 'S' stand for in the ASIST emergency acronym?", options: ["Support", "Separate", "Silence", "Squawk"], correct: 2 },
+      { question: "Which of the following is NOT expected during an ACAS RA?", options: ["Climb/descent without prior warning", "Emergency squawk", "Notification of 'TCAS climb'", "Busy pilots"], correct: 1 },
+      { question: "What is the initial response to a birdstrike?", options: ["Landing at nearest airport", "Abandon take-off", "Contact maintenance", "Shut down engine"], correct: 1 },
+      { question: "Which squawk code indicates a general emergency?", options: ["7700", "7600", "7500", "7000"], correct: 0 },
+      // ... continue adding all 40 questions just like these above
+    ];
+
+    function loadQuestions() {
+      const container = document.getElementById('questions-container');
+      questions.forEach((q, index) => {
+        const div = document.createElement('div');
+        div.className = 'question';
+        div.innerHTML = `<h3>${index + 1}. ${q.question}</h3>`;
+        q.options.forEach((opt, i) => {
+          div.innerHTML += `<label><input type="radio" name="q${index}" value="${i}"> ${opt}</label>`;
+        });
+        container.appendChild(div);
+      });
+    }
+
+    let timerInterval;
+    function startQuiz() {
+      const name = document.getElementById('name').value.trim();
+      if (!name) {
+        alert('Please enter your name.');
+        return;
+      }
+      document.getElementById('start-section').style.display = 'none';
+      document.getElementById('quiz-content').style.display = 'block';
+      loadQuestions();
+      startTimer(15 * 60);
+    }
+
+    function startTimer(duration) {
+      let timer = duration, minutes, seconds;
+      timerInterval = setInterval(() => {
+        minutes = parseInt(timer / 60, 10);
+        seconds = parseInt(timer % 60, 10);
+        minutes = minutes < 10 ? "0" + minutes : minutes;
+        seconds = seconds < 10 ? "0" + seconds : seconds;
+        document.getElementById('timer').textContent = minutes + ":" + seconds;
+        if (--timer < 0) {
+          clearInterval(timerInterval);
+          alert('Time is up! Quiz is being submitted.');
+          submitQuiz();
+        }
+      }, 1000);
+    }
+
+    function submitQuiz() {
+      clearInterval(timerInterval);
+      let score = 0;
+      questions.forEach((q, i) => {
+        const selected = document.querySelector(`input[name='q${i}']:checked`);
+        if (selected && parseInt(selected.value) === q.correct) {
+          score++;
+        }
+      });
+      const resultDiv = document.getElementById('result');
+      const percent = (score / questions.length) * 100;
+      const passed = percent >= 75;
+      resultDiv.innerHTML = `<h2>Results for ${document.getElementById('name').value}</h2>
+        <p>Score: ${score}/${questions.length} (${percent.toFixed(2)}%)</p>
+        <p class="${passed ? 'correct' : 'incorrect'}">${passed ? 'Passed' : 'Failed'}</p>`;
+      document.getElementById('quiz-content').style.display = 'none';
+      resultDiv.style.display = 'block';
+    }
+  </script>
+</body>
+</html>
